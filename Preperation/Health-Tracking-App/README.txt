@@ -1,5 +1,5 @@
 This project is a cutting-edge, modular health tracking application designed to provide a holistic view of your well-being. Built with real-time 
-data ingestion, structured analytics, and a scalable architecture, it empowers users to capture, visualize, and optimize every aspect of their health.
+data ingestion, structured analytics, and a scalable architecture, it empowers users to capture, visualize, and optimize all aspects of their health.
 
 Features
 	•	Comprehensive Data Capture – Log macronutrients, meals, sleep cycles, and exercise metrics with structured input for consistent analytics.
