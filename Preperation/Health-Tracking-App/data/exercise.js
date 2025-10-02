@@ -1,8 +1,10 @@
-import { db } from "./firebaseConfig.js";
+import { collection, doc, addDoc } from "firebase/firestore";
+import { db } from "../src/firebaseConfig.js";
 
 export async function addExercise(userId, exerciseData) {
     try {
-        const docRef = await db.collection("users").doc(userId).collection("exercise").add(exerciseData);
+        const docRef = await addDoc(collection(db, "users", userId, "exercise"), exerciseData);   
+
         console.log("Exercise entry added with ID:", docRef.id);
     } 
     catch (e) {

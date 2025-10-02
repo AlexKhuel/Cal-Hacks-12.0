@@ -1,8 +1,10 @@
+import { collection, doc, addDoc } from "firebase/firestore";
 import { db } from "./firebaseConfig.js";
 
 export async function addHydration(userId, hydrationData) {
     try {
-        const docRef = await db.collection("users").doc(userId).collection("hydration").add(hydrationData);
+        const docRef = await addDoc(collection(db, "users", userId, "hydration"), hydrationData);   
+
         console.log("Hydration entry added with ID:", docRef.id);
     } 
     catch (e) {

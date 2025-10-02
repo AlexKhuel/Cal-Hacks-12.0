@@ -1,8 +1,10 @@
-import { db } from "./firebaseConfig.js";
+import { collection, doc, addDoc } from "firebase/firestore";
+import { db } from "../src/firebaseConfig.js";
 
 export async function addDiet(userId, dietData) {
     try {
-        const docRef = await db.collection("users").doc(userId).collection("diet").add(dietData);
+        const docRef = await addDoc(collection(db, "users", userId, "diet"), dietData);    
+
         console.log("Diet entry added with ID:", docRef.id);
     } 
     catch (e) {

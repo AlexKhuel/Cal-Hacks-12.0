@@ -1,8 +1,10 @@
+import { collection, doc, addDoc } from "firebase/firestore";
 import { db } from "./firebaseConfig.js";
 
 export async function addSuggestions(userId, suggestionsData) {
     try {
-        const docRef = await db.collection("users").doc(userId).collection("suggestions").add(suggestionsData);
+        const docRef = await addDoc(collection(db, "users", userId, "suggestions"), suggestionsData);   
+
         console.log("Suggestions entry added with ID:", docRef.id);
     } 
     catch (e) {

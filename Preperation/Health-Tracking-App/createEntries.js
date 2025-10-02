@@ -1,10 +1,4 @@
-import { addSleep } from "./sleep.js";
- import { addDiet } from "./diet.js";
- import { addExercise } from "./exercise.js";
- import { addHydration } from "./hydration.js";
- import { addSuggestions } from "./suggestions.js";
-
- import { db } from "./firebaseConfig.js";
+import { addDiet, addExercise, addHydration, addLoginInfo, addSleep, addSuggestions } from './data';
 
 // Example usage for all functions:
  addSleep("JD-ChapCS-080707", {
