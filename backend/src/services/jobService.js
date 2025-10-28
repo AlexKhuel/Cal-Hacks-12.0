@@ -16,7 +16,7 @@ import { extractSkillsFromJobs } from '../utils/skillUtils.js';
 export async function getJobData() {
   try {
     console.log("Fetching jobs from Firestore...");
-    const snapshot = await db.collection('jobData').limit(500).get();
+    const snapshot = await db.collection('jobData').limit(5000).get();
     
     const jobs = {};
     snapshot.forEach((doc) => {
