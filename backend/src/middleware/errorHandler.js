@@ -10,36 +10,36 @@
  * @param {Object} res - Express response object
  * @param {Function} next - Express next function
  */
-export const errorHandler = (err, req, res, next) => {
-  console.error('Error:', err);
+export const errorHandler = (err, res) => {
+  console.error("Error:", err);
 
   // Default error response
   let statusCode = err.statusCode || 500;
-  let message = err.message || 'Internal Server Error';
+  let message = err.message || "Internal Server Error";
   let details = null;
 
   // Handle specific error types
-  if (err.name === 'ValidationError') {
+  if (err.name === "ValidationError") {
     statusCode = 400;
-    message = 'Validation Error';
+    message = "Validation Error";
     details = err.details;
-  } else if (err.name === 'UnauthorizedError') {
+  } else if (err.name === "UnauthorizedError") {
     statusCode = 401;
-    message = 'Unauthorized';
-  } else if (err.name === 'ForbiddenError') {
+    message = "Unauthorized";
+  } else if (err.name === "ForbiddenError") {
     statusCode = 403;
-    message = 'Forbidden';
-  } else if (err.name === 'NotFoundError') {
+    message = "Forbidden";
+  } else if (err.name === "NotFoundError") {
     statusCode = 404;
-    message = 'Not Found';
-  } else if (err.name === 'RateLimitError') {
+    message = "Not Found";
+  } else if (err.name === "RateLimitError") {
     statusCode = 429;
-    message = 'Too Many Requests';
+    message = "Too Many Requests";
   }
 
   // Don't expose internal errors in production
-  if (process.env.NODE_ENV === 'production' && statusCode === 500) {
-    message = 'Internal Server Error';
+  if (process.env.NODE_ENV === "production" && statusCode === 500) {
+    message = "Internal Server Error";
     details = null;
   }
 
@@ -50,9 +50,9 @@ export const errorHandler = (err, req, res, next) => {
       message,
       statusCode,
       ...(details && { details }),
-      ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+      ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
     },
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 };
 
