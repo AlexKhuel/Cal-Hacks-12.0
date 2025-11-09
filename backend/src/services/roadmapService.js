@@ -3,12 +3,12 @@
  * Handles personalized roadmap generation and storage
  */
 
-import Anthropic from '@anthropic-ai/sdk';
-import { db } from '../config/firebase.js';
+import Anthropic from "@anthropic-ai/sdk";
+import { db } from "../config/firebase.js";
 
 // === Initialize Claude ===
 const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY
+    apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
 /* -------------------------------------------------------------------------- */
@@ -17,35 +17,42 @@ const anthropic = new Anthropic({
 
 /** Fetch user questionnaire responses */
 async function fetchUserResponses(userId) {
-  console.log(`\n📥 Fetching responses from /users/${userId}/responses`);
-  const snap = await db.collection('users').doc(userId).collection('responses').get();
+    console.log(`\n📥 Fetching responses from /users/${userId}/responses`);
+    const snap = await db
+        .collection("users")
+        .doc(userId)
+        .collection("responses")
+        .get();
 
-  if (snap.empty) throw new Error(`No responses found for user ${userId}`);
+    if (snap.empty) throw new Error(`No responses found for user ${userId}`);
 
-  const responses = {};
-  snap.forEach(doc => (responses[doc.id] = doc.data()));
-  console.log(`✅ Retrieved ${Object.keys(responses).length} responses`);
-  return responses;
+    const responses = {};
+    snap.forEach((doc) => (responses[doc.id] = doc.data()));
+    console.log(`✅ Retrieved ${Object.keys(responses).length} responses`);
+    return responses;
 }
 
 /** Fetch user's sorted skills list */
 async function fetchUserSkills(userId) {
-  console.log(`\n📥 Fetching sorted skills from /users/${userId}/skillsAssessment/sortedSkillsList`);
-  const doc = await db.collection('users')
-    .doc(userId)
-    .collection('skillsAssessment')
-    .doc('sortedSkillsList')
-    .get();
+    console.log(
+        `\n📥 Fetching sorted skills from /users/${userId}/skillsAssessment/sortedSkillsList`
+    );
+    const doc = await db
+        .collection("users")
+        .doc(userId)
+        .collection("skillsAssessment")
+        .doc("sortedSkillsList")
+        .get();
 
-  if (!doc.exists) throw new Error(`No skills found for user ${userId}`);
+    if (!doc.exists) throw new Error(`No skills found for user ${userId}`);
 
-  const data = doc.data();
-  const skills = Array.isArray(data.allSkillsSorted)
-    ? data.allSkillsSorted
-    : Object.values(data.allSkillsSorted || {});
+    const data = doc.data();
+    const skills = Array.isArray(data.allSkillsSorted)
+        ? data.allSkillsSorted
+        : Object.values(data.allSkillsSorted || {});
 
-  console.log(`✅ Retrieved ${skills.length} skills`);
-  return skills;
+    console.log(`✅ Retrieved ${skills.length} skills`);
+    return skills;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -53,38 +60,38 @@ async function fetchUserSkills(userId) {
 /* -------------------------------------------------------------------------- */
 
 function formatSkills(skills) {
-  let text = '\n=== SKILLS ASSESSMENT ===\n\n';
-  const categories = {
-    proficient: skills.filter(s => s.matchStatus === 'proficient'),
-    gaps: skills.filter(s => s.matchStatus === 'gap'),
-    learning: skills.filter(s => s.matchStatus === 'learning')
-  };
+    let text = "\n=== SKILLS ASSESSMENT ===\n\n";
+    const categories = {
+        proficient: skills.filter((s) => s.matchStatus === "proficient"),
+        gaps: skills.filter((s) => s.matchStatus === "gap"),
+        learning: skills.filter((s) => s.matchStatus === "learning"),
+    };
 
-  for (const [label, list] of Object.entries(categories)) {
-    if (list.length === 0) continue;
-    text += `${label.toUpperCase()} SKILLS:\n`;
-    for (const skill of list) {
-      text += `  - ${skill.skill} (${skill.type}): ${skill.proficiencyLevel}% prof, importance ${skill.importance}, freq ${skill.frequency}/10\n`;
+    for (const [label, list] of Object.entries(categories)) {
+        if (list.length === 0) continue;
+        text += `${label.toUpperCase()} SKILLS:\n`;
+        for (const skill of list) {
+            text += `  - ${skill.skill} (${skill.type}): ${skill.proficiencyLevel}% prof, importance ${skill.importance}, freq ${skill.frequency}/10\n`;
+        }
+        text += "\n";
     }
-    text += '\n';
-  }
-  return text;
+    return text;
 }
 
 function formatResponses(responses) {
-  let text = '\n=== QUESTIONNAIRE RESPONSES ===\n\n';
-  for (const [key, val] of Object.entries(responses)) {
-    text += `${key}:\n`;
-    if (typeof val === 'object') {
-      for (const [k, v] of Object.entries(val)) {
-        text += `  ${k}: ${JSON.stringify(v)}\n`;
-      }
-    } else {
-      text += `  ${val}\n`;
+    let text = "\n=== QUESTIONNAIRE RESPONSES ===\n\n";
+    for (const [key, val] of Object.entries(responses)) {
+        text += `${key}:\n`;
+        if (typeof val === "object") {
+            for (const [k, v] of Object.entries(val)) {
+                text += `  ${k}: ${JSON.stringify(v)}\n`;
+            }
+        } else {
+            text += `  ${val}\n`;
+        }
+        text += "\n";
     }
-    text += '\n';
-  }
-  return text;
+    return text;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -92,9 +99,9 @@ function formatResponses(responses) {
 /* -------------------------------------------------------------------------- */
 
 async function generateRoadmapWithClaude(responses, skills) {
-  console.log(`\n🤖 Generating roadmap with Claude...`);
+    console.log(`\n🤖 Generating roadmap with Claude...`);
 
-  const prompt = `
+    const prompt = `
 You are a career advisor generating a personalized learning roadmap for a student preparing for software engineering internships.
 
 ## USER DATA
@@ -126,22 +133,22 @@ Return ONLY valid JSON in this structure:
   }
 }`;
 
-  const response = await anthropic.messages.create({
-  model: 'claude-sonnet-4-20250514', // ✅ Current model name
-  max_tokens: 8000,
-  messages: [{ role: 'user', content: prompt }]
-});
+    const response = await anthropic.messages.create({
+        model: "claude-sonnet-4-20250514", // ✅ Current model name
+        max_tokens: 8000,
+        messages: [{ role: "user", content: prompt }],
+    });
 
-  const text = response.content[0].text.trim();
-  return {
-    roadmapText: text,
-    metadata: {
-      generatedAt: new Date().toISOString(),
-      model: 'claude-sonnet-4-20250514',
-      totalSkills: skills.length,
-      skillGaps: skills.filter(s => s.matchStatus === 'gap').length
-    }
-  };
+    const text = response.content[0].text.trim();
+    return {
+        roadmapText: text,
+        metadata: {
+            generatedAt: new Date().toISOString(),
+            model: "claude-sonnet-4-20250514",
+            totalSkills: skills.length,
+            skillGaps: skills.filter((s) => s.matchStatus === "gap").length,
+        },
+    };
 }
 
 /* -------------------------------------------------------------------------- */
@@ -149,32 +156,36 @@ Return ONLY valid JSON in this structure:
 /* -------------------------------------------------------------------------- */
 
 async function saveRoadmap(userId, roadmapData) {
-  console.log(`\n💾 Saving roadmap to /users/${userId}/roadmap`);
+    console.log(`\n💾 Saving roadmap to /users/${userId}/roadmap`);
 
-  try {
-    let json = roadmapData.roadmapText;
-    if (json.includes('```')) json = json.replace(/```json|```/g, '').trim();
+    try {
+        let json = roadmapData.roadmapText;
+        if (json.includes("```"))
+            json = json.replace(/```json|```/g, "").trim();
 
-    const parsed = JSON.parse(json);
+        const parsed = JSON.parse(json);
 
-    // Fix the metadata issue - provide default if undefined
-    const metadata = roadmapData.metadata || {
-      generatedAt: new Date().toISOString(),
-      model: 'claude-sonnet-4-20250514',
-      totalSkills: 0,
-      skillGaps: 0
-    };
+        // Fix the metadata issue - provide default if undefined
+        const metadata = roadmapData.metadata || {
+            generatedAt: new Date().toISOString(),
+            model: "claude-sonnet-4-20250514",
+            totalSkills: 0,
+            skillGaps: 0,
+        };
 
-    await db.collection('users').doc(userId).set(
-      { roadmap: { ...parsed, metadata: metadata } }, // ✅ Use the safe metadata
-      { merge: true }
-    );
+        await db
+            .collection("users")
+            .doc(userId)
+            .set(
+                { roadmap: { ...parsed, metadata: metadata } }, // ✅ Use the safe metadata
+                { merge: true }
+            );
 
-    console.log(`✅ Roadmap saved under /users/${userId}/roadmap`);
-  } catch (error) {
-    console.error('Error saving roadmap:', error);
-    throw error;
-  }
+        console.log(`✅ Roadmap saved under /users/${userId}/roadmap`);
+    } catch (error) {
+        console.error("Error saving roadmap:", error);
+        throw error;
+    }
 }
 
 /* -------------------------------------------------------------------------- */
@@ -182,36 +193,36 @@ async function saveRoadmap(userId, roadmapData) {
 /* -------------------------------------------------------------------------- */
 
 export async function generateRoadmap(userId) {
-  console.log('\n🧭 ROADMAP GENERATION STARTED for:', userId);
-  
-  try {
-    // Add this check
-    console.log('📋 Checking if roadmap already exists...');
-    const userDoc = await db.collection('users').doc(userId).get();
-    const userData = userDoc.data() || {};
+    console.log("\n🧭 ROADMAP GENERATION STARTED for:", userId);
 
-    if (userData.hasOwnProperty('roadmap')) {
-      console.log(`⚠️ Roadmap already exists — skipping generation.`);
-      return { userId, alreadyExists: true };
+    try {
+        // Add this check
+        console.log("📋 Checking if roadmap already exists...");
+        const userDoc = await db.collection("users").doc(userId).get();
+        const userData = userDoc.data() || {};
+
+        if (userData.hasOwnProperty("roadmap")) {
+            console.log(`⚠️ Roadmap already exists — skipping generation.`);
+            return { userId, alreadyExists: true };
+        }
+
+        console.log("📥 Fetching user data...");
+        const [responses, skills] = await Promise.all([
+            fetchUserResponses(userId),
+            fetchUserSkills(userId),
+        ]);
+
+        console.log("🤖 Calling Claude API...");
+        const roadmapData = await generateRoadmapWithClaude(responses, skills);
+        console.log("✅ Claude API returned data");
+
+        console.log("💾 Saving to Firebase...");
+        await saveRoadmap(userId, roadmapData);
+        console.log("✅ Saved to Firebase successfully");
+
+        return { userId, generated: true };
+    } catch (err) {
+        console.error(`❌ ROADMAP GENERATION FAILED:`, err);
+        throw err;
     }
-
-    console.log('📥 Fetching user data...');
-    const [responses, skills] = await Promise.all([
-      fetchUserResponses(userId),
-      fetchUserSkills(userId)
-    ]);
-
-    console.log('🤖 Calling Claude API...');
-    const roadmapData = await generateRoadmapWithClaude(responses, skills);
-    console.log('✅ Claude API returned data');
-
-    console.log('💾 Saving to Firebase...');
-    await saveRoadmap(userId, roadmapData);
-    console.log('✅ Saved to Firebase successfully');
-
-    return { userId, generated: true };
-  } catch (err) {
-    console.error(`❌ ROADMAP GENERATION FAILED:`, err);
-    throw err;
-  }
 }
